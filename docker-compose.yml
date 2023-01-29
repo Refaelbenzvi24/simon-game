@@ -7,6 +7,9 @@ services:
       POSTGRES_PASSWORD: 1234
       PGDATA: /data/postgres
       POSTGRES_DB: ${DB_DATABASE:-simon-game}
+    networks:
+      - main_network
+      - db_network
     volumes:
       - postgres:/data/postgres
     ports:
@@ -20,6 +23,8 @@ services:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
       PGADMIN_CONFIG_SERVER_MODE: 'False'
+    networks:
+      - db_network
     volumes:
       - pgadmin:/var/lib/pgadmin
     ports:
@@ -28,6 +33,53 @@ services:
     depends_on:
       - postgres
 
+  migration:
+    container_name: prisma_migration.simon_game_container
+    build:
+      context: .
+      dockerfile: ./server/prisma/Dockerfile
+    environment:
+      DATABASE_URL: postgresql://root:1234@postgres:5432/simon-game?schema=public
+    restart: on-failure
+    networks:
+      - db_network
+    depends_on:
+      - postgres
+
+  server:
+    container_name: server.simon_game_container
+    build:
+      context: .
+      dockerfile: ./server/Dockerfile
+    environment:
+      PORT: 8080
+      DATABASE_URL: postgresql://root:1234@postgres:5432/simon-game?schema=public
+    ports:
+      - 3000:8080
+    restart: unless-stopped
+    depends_on:
+      - migration
+    networks:
+      - main_network
+
+  client:
+    container_name: client.simon_game_container
+    build:
+      context: .
+      dockerfile: ./client/Dockerfile
+    ports:
+      - 8080:80
+    depends_on:
+      - server
+    restart: unless-stopped
+    network_mode: bridge
+
 volumes:
   postgres:
   pgadmin:
+
+networks:
+  main_network:
+    driver: bridge
+  db_network:
+    driver: bridge

@@ -12,18 +12,26 @@ A replica of the simon game [https://freesimon.org/](https://freesimon.org/)
 
 Clone: `git clone git@github.com:Refaelbenzvi24/simon-game.git`
 
+### Docker Only
+
+```bash
+docker compose up # from root folder
+```
+
+### Combined
+
 > NOTE: if you are using pnpm you can install all the dependencies from the root folder otherwise just go to each
 > folder(client & server) and install independently.
 
 > NOTE: other than the above comment everything being done with pnpm here can be accomplished with npm/yarn/etc...
 
-### With pnpm
+#### With pnpm
 
 ```bash
 pnpm i
 ```
 
-### With npm
+#### With npm
 
 ```bash
 cd server
@@ -37,7 +45,7 @@ then:
 install postgres and pgadmin using docker(from root folder):
 
 ```bash
-docker compose up # from root folder
+docker compose up postgres pgadmin # from root folder
 ```
 
 Migrating dev server:
